@@ -13,7 +13,7 @@ let oldInputValue;
 
 // Funções
 
-const saveTodo = (text) => {
+const saveTodo = (text, done = 0, save = 1) => {
     const todo = document.createElement("div")
     todo.classList.add("todo")
     const todoTitle = document.createElement("h3")
@@ -23,17 +23,26 @@ const saveTodo = (text) => {
     const doneBtn = document.createElement("button")
     doneBtn.classList.add("finish-todo")
     doneBtn.innerHTML = '<i class="fa-solid fa-check"></i>'
-    todo.appendChild(doneBtn)
+    todo.appendChild(doneBtn);
 
     const editBtn = document.createElement("button")
     editBtn.classList.add("edit-todo")
     editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>'
-    todo.appendChild(editBtn)
+    todo.appendChild(editBtn);
 
     const deleteBtn = document.createElement("button")
     deleteBtn.classList.add("remove-todo")
     deleteBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>'
-    todo.appendChild(deleteBtn)
+    todo.appendChild(deleteBtn);
+
+    // Utilizando dados da localstore
+    if(done){
+        todo.classList.add("done")
+    }
+
+    if(save){
+        saveTodoLocalStorage({text, done})
+    }
 
     todoList.appendChild(todo);
 
@@ -82,18 +91,21 @@ const filterTodos = (filterValue) => {
 
     switch(filterValue){
         case "all":
-            todos.forEach((todo) => todo.style.display = "flex");
+            todos.forEach((todo) => 
+                todo.style.display = "flex");
             break;
 
         case "done":
-            todos.forEach((todo) => todo.classList.contains("done")
+            todos.forEach((todo) => 
+            todo.classList.contains("done")
              ? (todo.style.display = "flex") 
              : (todo.style.display = "none")
             );
             break;
 
         case "todo":
-            todos.forEach((todo) => !todo.classList.contains("done")
+            todos.forEach((todo) => 
+            !todo.classList.contains("done")
              ? (todo.style.display = "flex") 
              : (todo.style.display = "none")
             );
@@ -180,4 +192,32 @@ filterBtn.addEventListener("change", (e) => {
     const filterValue = e.target.value;
 
     filterTodos(filterValue);
-})
+});
+
+// Local Storage
+const getTodosLocalStorage = () => {
+    const todos = JSON.parse(localStorage.getItem("todos")) || []
+    return todos;
+};
+
+const saveTodoLocalStorage = (todo) => {
+
+    // todos os todos da local Storage
+    const todos = getTodosLocalStorage();
+
+    // adicionar o novo todo no arr
+    todos.push(todo);
+
+    // Salvar tudo no local Storage
+    localStorage.setItem("todos",JSON.stringify(todos));
+};
+
+const loadTodos = () => {
+    const todos = getTodosLocalStorage();
+
+    todos.forEach((todo) => { 
+        saveTodo(todo.text, todo.done, 0);
+    });
+};
+
+loadTodos();
